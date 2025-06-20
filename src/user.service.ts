@@ -9,6 +9,7 @@ export class UserService {
   private nextId = 1;
 
   create(createUserDto: CreateUserDto): User {
+    console.log('Creating user:', createUserDto);
     const user: User = {
       id: this.nextId++,
       ...createUserDto,
