@@ -1,5 +1,6 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Controller, Get, Param, ParseIntPipe } from '@nestjs/common';
 import { AppService } from './app.service';
+import { UpperCasePipe } from './pipes/upper-case-pipe';
 
 @Controller()
 export class AppController {
@@ -15,8 +16,13 @@ export class AppController {
     return this.appService.getDetails();
   }
 
-  @Get('/users/:id')
-  getUserById(@Param('id') id: string): string {
-    return `User ID: ${id}`;
+  @Get('/details/:name')
+  getUserDetails(@Param('name', UpperCasePipe) name: string): string {
+    return `User Name: ${name}`;
   }
+
+  // @Get('/users/:id')
+  // getUserById(@Param('id', ParseIntPipe) id: number): string {
+  //   return `User ID: ${id}`;
+  // }
 }
