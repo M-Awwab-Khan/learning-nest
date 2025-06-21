@@ -4,38 +4,44 @@ import {
   ExecutionContext,
   UnauthorizedException,
 } from '@nestjs/common';
+import { JwtService } from '@nestjs/jwt';
 import { Observable } from 'rxjs';
+import { UserService } from 'src/user.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
+  constructor(
+    private jwtService: JwtService,
+    private userService: UserService,
+  ) {}
+
   canActivate(
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
-    // Check if authorization header exists
-    if (!authHeader) {
-      throw new UnauthorizedException('Authorization header is missing');
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      throw new UnauthorizedException(
+        'Missing or invalid authorization header',
+      );
     }
 
-    // Simple token validation (in real apps, you'd validate JWT or API key)
     const token = authHeader.replace('Bearer ', '');
 
-    // For demo purposes, we'll accept tokens: 'valid-token' or 'admin-token'
-    const validTokens = ['valid-token', 'admin-token', 'user-token'];
+    try {
+      const payload = this.jwtService.verify(token, {
+        secret:
+          'SnrFK!>ytwfbGF*K!{=3@@#nQa|]PxvB~%3yV3KpM]::L%&FfVM,X4~ik~%:K[[',
+      });
 
-    if (!validTokens.includes(token)) {
-      throw new UnauthorizedException('Invalid token');
+      const user = this.userService.findOne(payload.sub);
+      if (!user) throw new UnauthorizedException('User not found');
+
+      request.user = user;
+      return true;
+    } catch (err) {
+      throw new UnauthorizedException('Invalid or expired token');
     }
-
-    // Add user info to request object for later use
-    request.user = {
-      id: token === 'admin-token' ? 1 : 2,
-      role: token === 'admin-token' ? 'admin' : 'user',
-      token: token,
-    };
-
-    return true;
   }
 }

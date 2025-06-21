@@ -16,7 +16,6 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { CustomValidationPipe } from './pipes/custom-validation.pipe';
-import { User } from './interfaces/user.interface';
 import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { RateLimitGuard } from './guards/rate-limit.guard';
@@ -31,10 +30,12 @@ export class UserController {
   @UsePipes(CustomValidationPipe)
   create(@Body() createUserDto: CreateUserDto) {
     console.log('Creating user:', createUserDto);
+    const { user, token } = this.userService.create(createUserDto);
     return {
       success: true,
       message: 'User created successfully',
-      data: this.userService.create(createUserDto),
+      data: user,
+      token: token,
     };
   }
 

@@ -2,21 +2,32 @@ import { Injectable } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './interfaces/user.interface';
+import { JwtService } from '@nestjs/jwt';
 
+enum UserRole {
+  admin = 'admin',
+  user = 'user',
+}
 @Injectable()
 export class UserService {
+  constructor(private jwtService: JwtService) {}
   private users: User[] = [];
   private nextId = 1;
 
-  create(createUserDto: CreateUserDto): User {
+  create(createUserDto: CreateUserDto): { user: User; token: string } {
     console.log('Creating user:', createUserDto);
     const user: User = {
       id: this.nextId++,
       ...createUserDto,
+      role: createUserDto.role || UserRole.user,
       createdAt: new Date(),
     };
     this.users.push(user);
-    return user;
+
+    const payload = { sub: user.id, role: user.role };
+    const token = this.jwtService.sign(payload);
+
+    return { user, token };
   }
 
   findAll(): User[] {

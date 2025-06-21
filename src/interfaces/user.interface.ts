@@ -5,4 +5,5 @@ export interface User {
   age?: number;
   bio?: string;
   createdAt: Date;
+  role: 'user' | 'admin';
 }

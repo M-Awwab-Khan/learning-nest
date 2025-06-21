@@ -8,6 +8,7 @@ import {
   IsInt,
   Min,
   Max,
+  IsEnum,
 } from 'class-validator';
 
 export class CreateUserDto {
@@ -31,4 +32,11 @@ export class CreateUserDto {
   @IsString({ message: 'Bio must be a string' })
   @MaxLength(500, { message: 'Bio must not exceed 500 characters' })
   bio?: string;
+
+  @IsOptional()
+  @IsEnum(['admin', 'user'], {
+    message: 'Role must be either "admin" or "user"',
+  })
+  @MaxLength(20, { message: 'Role must not exceed 20 characters' })
+  role?: 'admin' | 'user';
 }
