@@ -5,19 +5,16 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
-import { Observable } from 'rxjs';
-import { UserService } from 'src/user.service';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
     private jwtService: JwtService,
-    private userService: UserService,
+    private prisma: PrismaService,
   ) {}
 
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const authHeader = request.headers.authorization;
 
@@ -31,11 +28,11 @@ export class AuthGuard implements CanActivate {
 
     try {
       const payload = this.jwtService.verify(token, {
-        secret:
-          'SnrFK!>ytwfbGF*K!{=3@@#nQa|]PxvB~%3yV3KpM]::L%&FfVM,X4~ik~%:K[[',
+        secret: process.env.JWT_SECRET,
       });
-
-      const user = this.userService.findOne(payload.sub);
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.sub },
+      });
       if (!user) throw new UnauthorizedException('User not found');
 
       request.user = user;

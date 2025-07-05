@@ -8,15 +8,25 @@ import { AuthGuard } from './guards/auth.guard';
 import { RolesGuard } from './guards/roles.guard';
 import { RateLimitGuard } from './guards/rate-limit.guard';
 import { JwtModule } from '@nestjs/jwt';
+import { AuthModule } from './auth/auth.module';
+import { PrismaService } from './prisma.service';
 
 @Module({
   imports: [
     JwtModule.register({
-      secret: 'SnrFK!>ytwfbGF*K!{=3@@#nQa|]PxvB~%3yV3KpM]::L%&FfVM,X4~ik~%:K[[', // Use environment variable in production!
+      secret: process.env.JWT_SECRET,
       signOptions: { expiresIn: '1h' },
     }),
+    AuthModule,
   ],
   controllers: [AppController, UserController, AdminController],
-  providers: [AppService, UserService, AuthGuard, RolesGuard, RateLimitGuard],
+  providers: [
+    AppService,
+    UserService,
+    AuthGuard,
+    RolesGuard,
+    RateLimitGuard,
+    PrismaService,
+  ],
 })
 export class AppModule {}
